@@ -1,0 +1,16 @@
+pandas
+numpy
+scikit-learn
+xgboost
+imbalanced-learn
+shap
+streamlit
+fastapi
+uvicorn
+google-generativeai
+pytest
+matplotlib
+seaborn
+python-multipart
+Requests
+python-dotenv

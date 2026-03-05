@@ -1,0 +1,14 @@
+# Environments
+venv/
+.env
+
+# General
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Models and data
+src/models/saved_models/*.pkl
+data/raw/*.csv
+data/processed/*.csv
+data/processed/*.pkl
