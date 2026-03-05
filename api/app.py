@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import sys
@@ -13,6 +14,15 @@ app = FastAPI(
     title="AI Loan Default Intelligence API",
     description="API for predicting loan defaults, explaining the factors via SHAP, and generating a text summary with GenAI.",
     version="1.0.0"
+)
+
+# Enable CORS for Next.js frontend (default port 3000)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Load systems at startup
