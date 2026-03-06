@@ -16,36 +16,36 @@ const RiskCard: React.FC<RiskCardProps> = ({ probability, category }) => {
   let gradientClass: string;
   
   if (category === 'High') {
-    ringColor = 'ring-red-500/50';
-    textColor = 'text-red-400';
+    ringColor = 'ring-red-200 bg-red-50';
+    textColor = 'text-red-600';
     gradientClass = 'text-gradient-danger';
     Icon = AlertTriangle;
   } else if (category === 'Moderate') {
-    ringColor = 'ring-amber-500/50';
-    textColor = 'text-amber-400';
+    ringColor = 'ring-amber-200 bg-amber-50';
+    textColor = 'text-amber-600';
     gradientClass = 'text-gradient-warning';
     Icon = Activity;
   } else {
-    ringColor = 'ring-emerald-500/50';
-    textColor = 'text-emerald-400';
+    ringColor = 'ring-emerald-200 bg-emerald-50';
+    textColor = 'text-emerald-700';
     gradientClass = 'text-gradient-success';
     Icon = ShieldCheck;
   }
 
   return (
     <div className={`glass-panel p-6 flex flex-col items-center justify-center space-y-4 ring-1 ${ringColor} animate-slide-up hover:scale-[1.02] transition-transform duration-300 h-full`}>
-      <div className={`p-4 rounded-full bg-slate-800/80 shadow-inner ${textColor}`}>
+      <div className={`p-4 rounded-full bg-white shadow-sm ${textColor}`}>
         <Icon size={48} strokeWidth={1.5} />
       </div>
       
       <div className="text-center">
-        <h2 className="text-sm uppercase tracking-wider text-slate-400 font-semibold mb-1">
+        <h2 className="text-sm uppercase tracking-wider text-slate-500 font-bold mb-1">
           Predicted Default Risk
         </h2>
         <div className={`text-5xl font-extrabold text-gradient ${gradientClass}`}>
           {probPercentage}%
         </div>
-        <div className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-medium uppercase tracking-widest border border-current ${textColor} bg-slate-900/50`}>
+        <div className={`mt-2 inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border border-current ${textColor} bg-white`}>
           {category} Risk
         </div>
       </div>

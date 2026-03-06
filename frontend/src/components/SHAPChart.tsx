@@ -34,15 +34,15 @@ const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
     const isRisk = data.shapValue > 0;
     
     return (
-      <div className="glass-panel p-3 border border-slate-700 bg-slate-900/95 text-sm">
-        <p className="font-semibold text-slate-200 mb-1">{data.name}</p>
+      <div className="glass-panel p-3 border border-slate-200 bg-white/95 text-sm shadow-lg">
+        <p className="font-semibold text-slate-800 mb-1">{data.name}</p>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Actual Value:</span>
-          <span className="font-mono text-slate-100">{Number(data.rawValue).toFixed(2)}</span>
+          <span className="text-slate-500">Actual Value:</span>
+          <span className="font-mono text-slate-900">{Number(data.rawValue).toFixed(2)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Risk Impact:</span>
-          <span className={`font-mono font-bold ${isRisk ? 'text-red-400' : 'text-emerald-400'}`}>
+          <span className="text-slate-500">Risk Impact:</span>
+          <span className={`font-mono font-bold ${isRisk ? 'text-red-600' : 'text-emerald-600'}`}>
             {isRisk ? '+' : ''}{Number(data.shapValue).toFixed(4)}
           </span>
         </div>
@@ -75,11 +75,11 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
   return (
     <div className="glass-panel p-6 w-full h-full min-h-[400px] flex flex-col">
       <div className="mb-4">
-        <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+        <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-700"></span>
           Quantifiable Risk Drivers
         </h3>
-        <p className="text-sm text-slate-400">SHAP values indicating mathematical feature impact.</p>
+        <p className="text-sm text-slate-500 font-medium">SHAP values indicating mathematical feature impact.</p>
       </div>
       
       <div className="flex-grow w-full relative -ml-4">
@@ -90,25 +90,25 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
             margin={{ top: 10, right: 30, left: 50, bottom: 5 }}
             barSize={20}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(0,0,0,0.05)" />
             
             <XAxis 
               type="number" 
-              tick={{ fill: '#94a3b8', fontSize: 12 }}
-              stroke="#475569" 
+              tick={{ fill: '#64748b', fontSize: 12 }}
+              stroke="#cbd5e1" 
             />
             
             <YAxis 
               type="category" 
               dataKey="name" 
-              tick={{ fill: '#f1f5f9', fontSize: 11, fontWeight: 500 }}
+              tick={{ fill: '#334155', fontSize: 11, fontWeight: 600 }}
               width={140}
-              stroke="#475569"
+              stroke="#cbd5e1"
             />
             
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
             
-            <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1} strokeDasharray="3 3" />
+            <ReferenceLine x={0} stroke="#94a3b8" strokeWidth={1} strokeDasharray="3 3" />
             
             <Bar dataKey="shapValue" radius={[0, 4, 4, 0]}>
               {data.map((entry, index) => (
@@ -123,13 +123,13 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
         </ResponsiveContainer>
       </div>
       
-      <div className="flex justify-center gap-6 mt-4 text-xs font-medium text-slate-400">
+      <div className="flex justify-center gap-6 mt-4 text-xs font-bold text-slate-500">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-red-500/80"></div>
+          <div className="w-3 h-3 rounded-sm bg-red-500"></div>
           <span>Increases Default Risk</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-emerald-500/80"></div>
+          <div className="w-3 h-3 rounded-sm bg-emerald-500"></div>
           <span>Decreases Default Risk</span>
         </div>
       </div>

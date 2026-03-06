@@ -22,27 +22,27 @@ const NarrativeBox: React.FC<NarrativeBoxProps> = ({
       </div>
 
       <div className="flex items-center gap-3 mb-4 relative z-10">
-        <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+        <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
           <Sparkles size={20} />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-slate-100">{title}</h3>
-          <p className="text-xs text-slate-400">{subtitle}</p>
+          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
+          <p className="text-xs text-slate-500 font-medium">{subtitle}</p>
         </div>
       </div>
 
       <div className="flex-grow flex items-stretch">
-        <div className="w-full bg-slate-900/50 rounded-xl p-5 border border-slate-700/50 relative z-10 min-h-[150px]">
+        <div className="w-full bg-slate-50 rounded-xl p-5 border border-slate-200 relative z-10 min-h-[150px] shadow-inner">
           {isLoading ? (
             <div className="animate-pulse space-y-3">
-              <div className="h-4 bg-slate-700/50 rounded w-3/4"></div>
-              <div className="h-4 bg-slate-700/50 rounded w-full"></div>
-              <div className="h-4 bg-slate-700/50 rounded w-5/6"></div>
-              <div className="h-4 bg-slate-700/50 rounded w-1/2"></div>
+              <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+              <div className="h-4 bg-slate-200 rounded w-full"></div>
+              <div className="h-4 bg-slate-200 rounded w-5/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
             </div>
           ) : text ? (
-            <div className="prose prose-invert prose-sm max-w-none">
-              <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[15px]">
+            <div className="prose prose-sm max-w-none">
+              <p className="text-slate-700 leading-relaxed whitespace-pre-line text-[15px] font-medium">
                 {text}
               </p>
             </div>

@@ -90,27 +90,27 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#050B14] p-4 md:p-6 text-slate-200">
+    <main className="min-h-screen bg-slate-50 p-4 md:p-6 text-slate-900 font-sans">
       {/* Premium Command Center Header */}
-      <header className="mb-6 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-white/5 pb-4">
+      <header className="mb-6 flex flex-col md:flex-row justify-between items-end gap-6 border-b border-slate-200 pb-4">
         <div>
           <div className="flex items-center gap-3">
-             <Landmark className="text-blue-500" size={32} />
-             <h1 className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400">
-                Lending Command Center
+             <Landmark className="text-blue-900" size={32} />
+             <h1 className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-950 via-blue-800 to-indigo-900">
+                Private Wealth Analytics
              </h1>
           </div>
-          <p className="text-sm font-mono text-slate-500 mt-1 uppercase tracking-widest pl-11">
-             Advanced AI Default & Fraud Orchestration
+          <p className="text-sm font-semibold text-slate-500 mt-1 uppercase tracking-widest pl-11">
+             Advanced Orchestration Dashboard
           </p>
         </div>
 
         {/* Applicant Selector */}
-        <div className="flex items-center gap-4 bg-white/5 p-2 px-4 rounded-xl border border-white/10 w-full md:w-auto">
+        <div className="flex items-center gap-4 bg-white p-2 px-4 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto">
           <Search size={18} className="text-slate-400" />
           <div className="flex flex-col flex-grow min-w-[200px]">
             <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-              Search Synthetic Applicant ID (0-999)
+              Search Profile ID (0-999)
             </label>
             <input 
               type="range" 
@@ -118,20 +118,20 @@ export default function Home() {
               max="999" 
               value={applicantId}
               onChange={(e) => setApplicantId(parseInt(e.target.value))}
-              className="w-full accent-blue-500 mt-1"
+              className="w-full accent-blue-900 mt-1"
             />
           </div>
-          <div className="bg-black/50 px-4 py-2 rounded-lg font-mono font-bold text-emerald-400 min-w-[70px] text-center border border-white/5 shadow-inner">
+          <div className="bg-slate-100 px-4 py-2 rounded-lg font-mono font-bold text-slate-900 min-w-[70px] text-center border border-slate-200 shadow-inner">
             #{applicantId.toString().padStart(3, '0')}
           </div>
         </div>
       </header>
 
       {error ? (
-        <div className="glass-panel text-red-400 p-8 text-center ring-1 ring-red-500/30 w-full max-w-2xl mx-auto mt-20">
+        <div className="glass-panel text-red-600 p-8 text-center ring-1 ring-red-200 w-full max-w-2xl mx-auto mt-20">
           <FileWarning size={48} className="mx-auto mb-4" />
           <p className="font-bold text-lg">{error}</p>
-          <p className="text-sm mt-2 text-slate-400">Make sure the FastAPI backend is running on port 8000 and the DB exists.</p>
+          <p className="text-sm mt-2 text-slate-500">Ensure the backend services are synchronized.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full max-w-screen-2xl mx-auto">
