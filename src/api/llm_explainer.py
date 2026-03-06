@@ -71,6 +71,30 @@ Keep the tone objective and professional. Do not use terms like "SHAP values" or
             return response.text
         except Exception as e:
             return f"Error generating explanation: {str(e)}"
+            
+    def generate_health_coach_plan(self, explanation_data: Dict[str, Any]) -> str:
+        """
+        Takes the SHAP explanation dictionary and returns an actionable "Path to Approval" checklist.
+        """
+        prompt = f"""
+You are a financial health coach. A borrower's loan application was flagged as high-risk.
+
+Here are the top factors that INCREASED their risk of default (the reasons they might be rejected):
+{"\n".join([f"- {f['Feature']} (Value: {f['Value']:.2f})" for f in explanation_data['risk_factors_increasing_default']])}
+
+Please create a concise, 3-step "Path to Approval" checklist. Each step should be one sentence, highly actionable, and directly address one of the risk factors above. Start immediately with the numbered list. No greeting or closing remarks.
+"""
+        if not self.client:
+            return "1. Reduce your credit utilization by paying down existing debt.\n2. Maintain consistent, on-time payments to improve your payment history.\n3. Wait 3-6 months to establish a longer period of employment or residency stability."
+
+        try:
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            return f"Error generating health coach plan: {str(e)}"
 
 if __name__ == "__main__":
     # Example test data matching the output structure from src/models/explain.py

@@ -55,6 +55,10 @@ class FeatureEngineer:
         # High DTI with low credit score is an extremely high risk signal
         df_engineer['risk_interaction_dti_credit'] = df_engineer['dti_ratio'] / (df_engineer['credit_score'] + 1)
         
+        # Note: The new advanced ML features (spending_volatility, savings_velocity, utility_payment_lag, 
+        # employer_industry_risk_flag, document_mismatch_score, identity_fraud_intent, historical_balances)
+        # are already carried over from the df.copy() above.
+
         print("Feature engineering complete.")
         return df_engineer
 

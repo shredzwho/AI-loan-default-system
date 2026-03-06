@@ -19,7 +19,7 @@ class DataLoader:
             print(f"Data file not found at {self.data_path}. Generating synthetic dataset for demonstration...")
             return self._generate_synthetic_data()
 
-    def _generate_synthetic_data(self, n_samples=10000) -> pd.DataFrame:
+    def _generate_synthetic_data(self, n_samples=1000) -> pd.DataFrame:
         """
         Generates a synthetic loan dataset with relevant features.
         """
@@ -62,6 +62,39 @@ class DataLoader:
 
         # Target variable: 1 for Default, 0 for Fully Paid
         df['loan_status'] = y
+        
+        # --- NEW ADVANCED MODULE FEATURES ---
+        
+        # 1. Financial Stress Predictor Features
+        df['spending_volatility'] = np.random.uniform(0.1, 0.9, size=n_samples) + (y * 0.2)
+        df['spending_volatility'] = np.clip(df['spending_volatility'], 0, 1)
+        
+        df['savings_velocity'] = np.random.uniform(-0.1, 0.5, size=n_samples) - (y * 0.15)
+        
+        df['utility_payment_lag'] = np.random.randint(0, 45, size=n_samples) + (y * 15)
+        
+        # Historical Time-Series (12 months of mock bank balances) for the UI chart
+        # We store it as a stringified list so it fits in a CSV cell
+        historical_balances = []
+        for i in range(n_samples):
+            base = np.random.uniform(1000, 15000)
+            # If default (y=1), create a downward trend
+            trend = -np.random.uniform(50, 300) if y[i] == 1 else np.random.uniform(-50, 150)
+            balances = [max(0, base + (month * trend) + np.random.normal(0, 200)) for month in range(12)]
+            # Reverse so the most recent month is at the end
+            historical_balances.append(str([round(b, 2) for b in balances]))
+        df['historical_balances'] = historical_balances
+
+        # 2. Trust Graph Credit Scoring
+        employer_risks = ['Low', 'Moderate', 'Layoff_Alert', 'Market_Volatility']
+        df['employer_industry_risk_flag'] = np.random.choice(employer_risks, size=n_samples, p=[0.6, 0.2, 0.1, 0.1])
+        
+        # 3. Integrated Fraud Detector (OSINT mock)
+        df['document_mismatch_score'] = np.random.uniform(0, 100, size=n_samples)
+        # Higher score if default is 1, just to create some interesting overlapping correlations
+        df['identity_fraud_intent'] = np.random.choice([0, 1], size=n_samples, p=[0.95, 0.05])
+        
+        # ------------------------------------
         
         # Introduce some missing values to simulate real-world data (to be handled in Phase 3)
         np.random.seed(42)

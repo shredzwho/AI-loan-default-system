@@ -4,11 +4,16 @@ from pydantic import BaseModel
 import pandas as pd
 import sys
 import os
+import joblib
 
 # Add src to path so we can import our modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.models.explain import ModelExplainer
 from src.api.llm_explainer import DefaultExplainerLLM
+from src.api.stress_predictor import StressPredictor
+from src.api.negotiator import LoanNegotiator
+from src.api.trust_graph import TrustGraphScorer
+from src.api.fraud_detector import FraudDetector
 
 app = FastAPI(
     title="AI Loan Default Intelligence API",
@@ -28,12 +33,22 @@ app.add_middleware(
 # Load systems at startup
 explainer = None
 llm = None
+stress_predictor = None
+negotiator = None
+trust_graph = None
+fraud_detector = None
+label_encoders = None
 try:
     explainer = ModelExplainer(
         model_path="src/models/saved_models/xgboost.pkl",
         data_path="data/processed/test_processed.csv"
     )
     llm = DefaultExplainerLLM()
+    stress_predictor = StressPredictor()
+    negotiator = LoanNegotiator()
+    trust_graph = TrustGraphScorer()
+    fraud_detector = FraudDetector()
+    label_encoders = joblib.load(os.path.join("data/processed", "label_encoders.pkl"))
 except Exception as e:
     print(f"Warning: Models not fully initialized. {e}")
 
@@ -49,7 +64,7 @@ def analyze_borrower(request: BorrowerRequest):
     """
     Analyzes a borrower from the preprocessed test set.
     """
-    if not explainer or not llm:
+    if not explainer or not llm or not stress_predictor or not negotiator or not trust_graph or not fraud_detector:
         raise HTTPException(status_code=503, detail="Machine Learning models are not fully initialized. Ensure you have run train.py first.")
 
     try:
@@ -57,22 +72,60 @@ def analyze_borrower(request: BorrowerRequest):
         if request.applicant_id < 0 or request.applicant_id >= len(explainer.X_test):
             raise HTTPException(status_code=400, detail="Invalid applicant_id. Out of bounds.")
             
-        # 2. Get the explanation from the Explainability Module (SHAP + Predict)
+        # 2. Get the explanation from the Explainability Module (SHAP + Base Risk)
         explanation_data = explainer.explain_borrower(request.applicant_id)
+        raw_borrower_data = explainer.X_test.iloc[request.applicant_id].to_dict()
         
-        # 3. Generate Natural Language summary via GenAI Module
+        # Decode categorical variables for UI and downstream engines
+        if label_encoders:
+            for col, le in label_encoders.items():
+                if col in raw_borrower_data:
+                    # ML outputs floats, so cast to int before inverse transform
+                    val = int(raw_borrower_data[col])
+                    raw_borrower_data[col] = le.inverse_transform([val])[0]
+        base_probability = explanation_data['default_probability']
+        
+        # 3. Trust Graph: Adjust probability based on Employer node flags
+        graph_data = trust_graph.evaluate_graph_risk(raw_borrower_data, base_probability)
+        adjusted_probability = graph_data['adjusted_default_probability']
+        
+        # 4. Financial Stress Predictor: Trajectory and Score
+        stress_data = stress_predictor.analyze_stress(raw_borrower_data)
+        
+        # 5. Fraud Detector: 2x2 Risk Classification (Intent vs Ability)
+        fraud_data = fraud_detector.evaluate_fraud_risk(raw_borrower_data)
+        matrix_position = fraud_detector.generate_matrix_position(fraud_data['fraud_intent_category'], adjusted_probability)
+        fraud_data['matrix_position'] = matrix_position
+        
+        # 6. AI Negotiator: DTI Optimization for high-risk clients
+        negotiation_data = negotiator.negotiate(raw_borrower_data, adjusted_probability)
+        
+        # 7. GenAPI Explainer & Health Coach Recourse
+        # Update the explanation probability to the new adjusted one for the LLM context
+        explanation_data['default_probability'] = adjusted_probability
         narrative = llm.generate_explanation(explanation_data)
+        health_coach_plan = llm.generate_health_coach_plan(explanation_data)
         
-        # 4. Construct Response
+        # 8. Construct Command Center Master Payload
         response = {
             "applicant_id": request.applicant_id,
             "prediction_metrics": {
-                "default_probability": round(explanation_data['default_probability'], 4),
-                "risk_category": "High" if explanation_data['default_probability'] > 0.50 else "Moderate" if explanation_data['default_probability'] > 0.20 else "Low"
+                "base_probability": round(base_probability, 4),
+                "adjusted_probability": round(adjusted_probability, 4),
+                "risk_category": "High" if adjusted_probability > 0.50 else "Moderate" if adjusted_probability > 0.20 else "Low"
             },
-            "top_risk_factors": explanation_data['risk_factors_increasing_default'],
-            "top_mitigating_factors": explanation_data['mitigating_factors_decreasing_default'],
-            "genai_narrative": narrative
+            "shap_explanation": {
+                "top_risk_factors": explanation_data['risk_factors_increasing_default'],
+                "top_mitigating_factors": explanation_data['mitigating_factors_decreasing_default']
+            },
+            "trust_graph_analysis": graph_data,
+            "financial_stress_analysis": stress_data,
+            "fraud_matrix_analysis": fraud_data,
+            "negotiation_alternatives": negotiation_data,
+            "genai_insights": {
+                "narrative": narrative,
+                "health_coach_plan": health_coach_plan
+            }
         }
         
         return response

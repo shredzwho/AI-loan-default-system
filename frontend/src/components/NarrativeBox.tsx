@@ -4,9 +4,16 @@ import { Bot, Sparkles } from 'lucide-react';
 interface NarrativeBoxProps {
   text: string | null;
   isLoading: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
-const NarrativeBox: React.FC<NarrativeBoxProps> = ({ text, isLoading }) => {
+const NarrativeBox: React.FC<NarrativeBoxProps> = ({ 
+  text, 
+  isLoading, 
+  title = "GenAI Analyst Summary", 
+  subtitle = "Powered by Gemini Explainable AI" 
+}) => {
   return (
     <div className="glass-panel p-6 relative overflow-hidden h-full flex flex-col items-stretch">
       {/* Background decoration */}
@@ -19,8 +26,8 @@ const NarrativeBox: React.FC<NarrativeBoxProps> = ({ text, isLoading }) => {
           <Sparkles size={20} />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-slate-100">GenAI Analyst Summary</h3>
-          <p className="text-xs text-slate-400">Powered by Gemini Explainable AI</p>
+          <h3 className="text-lg font-bold text-slate-100">{title}</h3>
+          <p className="text-xs text-slate-400">{subtitle}</p>
         </div>
       </div>
 
