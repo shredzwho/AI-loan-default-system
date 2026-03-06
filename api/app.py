@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import asyncio
+import json
 import pandas as pd
 import sys
 import os
@@ -82,7 +84,10 @@ def analyze_borrower(request: BorrowerRequest):
                 if col in raw_borrower_data:
                     # ML outputs floats, so cast to int before inverse transform
                     val = int(raw_borrower_data[col])
-                    raw_borrower_data[col] = le.inverse_transform([val])[0]
+                    if val == -1:
+                        raw_borrower_data[col] = "Unknown"
+                    else:
+                        raw_borrower_data[col] = le.inverse_transform([val])[0]
         base_probability = explanation_data['default_probability']
         
         # 3. Trust Graph: Adjust probability based on Employer node flags
@@ -132,3 +137,100 @@ def analyze_borrower(request: BorrowerRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.websocket("/ws/analyze_borrower")
+async def websocket_analyze_borrower(websocket: WebSocket):
+    await websocket.accept()
+    if not explainer or not llm or not stress_predictor or not negotiator or not trust_graph or not fraud_detector:
+        await websocket.send_json({"type": "error", "message": "ML models not fully initialized."})
+        await websocket.close()
+        return
+
+    try:
+        data = await websocket.receive_json()
+        applicant_id = int(data.get("applicant_id", -1))
+        
+        if applicant_id < 0 or applicant_id >= len(explainer.X_test):
+            await websocket.send_json({"type": "error", "message": "Invalid applicant_id. Out of bounds."})
+            await websocket.close()
+            return
+
+        # --- STEP 1: FAST DETERMINISTIC MODELS ---
+        explanation_data = explainer.explain_borrower(applicant_id)
+        raw_borrower_data = explainer.X_test.iloc[applicant_id].to_dict()
+        
+        if label_encoders:
+            for col, le in label_encoders.items():
+                if col in raw_borrower_data:
+                    val = int(raw_borrower_data[col])
+                    if val == -1:
+                        raw_borrower_data[col] = "Unknown"
+                    else:
+                        raw_borrower_data[col] = le.inverse_transform([val])[0]
+                    
+        base_probability = explanation_data['default_probability']
+        graph_data = trust_graph.evaluate_graph_risk(raw_borrower_data, base_probability)
+        adjusted_probability = graph_data['adjusted_default_probability']
+        stress_data = stress_predictor.analyze_stress(raw_borrower_data)
+        
+        fraud_data = fraud_detector.evaluate_fraud_risk(raw_borrower_data)
+        matrix_position = fraud_detector.generate_matrix_position(fraud_data['fraud_intent_category'], adjusted_probability)
+        fraud_data['matrix_position'] = matrix_position
+        
+        negotiation_data = negotiator.negotiate(raw_borrower_data, adjusted_probability)
+        
+        partial_response = {
+            "type": "partial",
+            "data": {
+                "applicant_id": applicant_id,
+                "prediction_metrics": {
+                    "base_probability": round(base_probability, 4),
+                    "adjusted_probability": round(adjusted_probability, 4),
+                    "risk_category": "High" if adjusted_probability > 0.50 else "Moderate" if adjusted_probability > 0.20 else "Low"
+                },
+                "shap_explanation": {
+                    "top_risk_factors": explanation_data['risk_factors_increasing_default'],
+                    "top_mitigating_factors": explanation_data['mitigating_factors_decreasing_default']
+                },
+                "trust_graph_analysis": graph_data,
+                "financial_stress_analysis": stress_data,
+                "fraud_matrix_analysis": fraud_data,
+                "negotiation_alternatives": negotiation_data,
+            }
+        }
+        
+        # Stream the 80% UI payload instantly 
+        await websocket.send_json(partial_response)
+        
+        # --- STEP 2: SLOW GENERATIVE AI (YIELD EXECUTION) ---
+        # Run synchronous Groq calls in executor to avoid blocking the event loop
+        explanation_data['default_probability'] = adjusted_probability
+        
+        loop = asyncio.get_event_loop()
+        narrative = await loop.run_in_executor(None, llm.generate_explanation, explanation_data)
+        health_coach_plan = await loop.run_in_executor(None, llm.generate_health_coach_plan, explanation_data)
+        
+        complete_response = {
+            "type": "complete",
+            "data": {
+                **partial_response["data"],
+                "genai_insights": {
+                    "narrative": narrative,
+                    "health_coach_plan": health_coach_plan
+                }
+            }
+        }
+        
+        # Stream the 100% finished payload 
+        await websocket.send_json(complete_response)
+        
+    except WebSocketDisconnect:
+        print("Client disconnected.")
+    except Exception as e:
+        await websocket.send_json({"type": "error", "message": str(e)})
+    finally:
+        # Keep connection open or close depending on architecture. We'll close after one full cycle to mimic request/response, but cleanly.
+        try:
+             await websocket.close()
+        except Exception:
+             pass

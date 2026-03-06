@@ -57,35 +57,72 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [isGenAILoading, setIsGenAILoading] = useState<boolean>(false);
+
   useEffect(() => {
     fetchApplicantData(applicantId);
   }, [applicantId]);
 
-  const fetchApplicantData = async (id: number) => {
+  const fetchApplicantData = (id: number) => {
     setIsLoading(true);
+    setIsGenAILoading(true);
     setError(null);
+    setData(null);
+
     try {
-      const response = await fetch('http://localhost:8000/analyze_borrower', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicant_id: id }),
-      });
+      const ws = new WebSocket('ws://localhost:8000/ws/analyze_borrower');
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.statusText}`);
-      }
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ applicant_id: id }));
+      };
 
-      const result = await response.json();
-      setData(result);
+      ws.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        
+        if (response.type === 'error') {
+          setError(response.message);
+          setIsLoading(false);
+          setIsGenAILoading(false);
+          ws.close();
+          return;
+        }
+
+        if (response.type === 'partial') {
+          // Render the core UI instantly
+          setData(response.data as APIResponse);
+          setIsLoading(false);
+        }
+
+        if (response.type === 'complete') {
+          // Render the GenAI payloads
+          setData(response.data as APIResponse);
+          setIsGenAILoading(false);
+          ws.close();
+        }
+      };
+
+      ws.onerror = (err) => {
+        setError("WebSocket connection failed. Ensure the backend is running.");
+        setIsLoading(false);
+        setIsGenAILoading(false);
+      };
+      
+      ws.onclose = () => {
+        // Handle unexpected disconnects during loading
+        if (isLoading || isGenAILoading) {
+            setIsLoading(false);
+            setIsGenAILoading(false);
+        }
+      };
+
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError("An unknown error occurred.");
       }
-      setData(null);
-    } finally {
       setIsLoading(false);
+      setIsGenAILoading(false);
     }
   };
 
@@ -110,12 +147,12 @@ export default function Home() {
           <Search size={18} className="text-slate-400" />
           <div className="flex flex-col flex-grow min-w-[200px]">
             <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-              Search Profile ID (0-999)
+              Search Profile ID (0-199)
             </label>
             <input
               type="range"
               min="0"
-              max="999"
+              max="199"
               value={applicantId}
               onChange={(e) => setApplicantId(parseInt(e.target.value))}
               className="w-full accent-blue-900 mt-1"
@@ -172,8 +209,8 @@ export default function Home() {
             {/* GenAI Health Coach */}
             <div className="flex-grow flex flex-col h-full">
               <NarrativeBox
-                text={data ? data.genai_insights.health_coach_plan : null}
-                isLoading={isLoading}
+                text={data && data.genai_insights ? data.genai_insights.health_coach_plan : null}
+                isLoading={isGenAILoading}
                 title="Explainable AI Health Coach"
                 subtitle="Path to Approval & Recourse Checklist"
               />
@@ -221,8 +258,8 @@ export default function Home() {
             {/* GenAI Analyst Narrative */}
             <div className="flex-grow h-full min-h-[300px]">
               <NarrativeBox
-                text={data ? data.genai_insights.narrative : null}
-                isLoading={isLoading}
+                text={data && data.genai_insights ? data.genai_insights.narrative : null}
+                isLoading={isGenAILoading}
                 title="GenAI Committee Summary"
                 subtitle="Integrated Financial Risk Narrative"
               />
