@@ -1,21 +1,19 @@
 import os
-from google import genai
+from groq import Groq
 from typing import Dict, Any
 from dotenv import load_dotenv
 
-# Load environment variables (e.g., GEMINI_API_KEY from a .env file if it exists)
+# Load environment variables
 load_dotenv()
 
 class DefaultExplainerLLM:
     def __init__(self):
-        # Assumes GEMINI_API_KEY is set in environment variables
-        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.api_key = os.getenv("GROQ_API_KEY")
         if self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
-            # Use a fast, capable model for generating text
-            self.model_name = 'gemini-2.5-flash'
+            self.client = Groq(api_key=self.api_key)
+            self.model_name = 'meta-llama/llama-4-maverick-17b-128e-instruct'
         else:
-            print("WARNING: GEMINI_API_KEY not found in environment. Mocking LLM response.")
+            print("WARNING: GROQ_API_KEY not found in environment. Mocking LLM response.")
             self.client = None
 
     def _construct_prompt(self, explanation_data: Dict[str, Any]) -> str:
@@ -64,11 +62,16 @@ Keep the tone objective and professional. Do not use terms like "SHAP values" or
             return f"[MOCK LLM RESPONSE]\nBased on the model, there is a {prob:.1f}% risk of default. The primary risk factor is {explanation_data['risk_factors_increasing_default'][0]['Feature']}. Manual review suggested."
 
         try:
-            response = self.client.models.generate_content(
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
                 model=self.model_name,
-                contents=prompt
             )
-            return response.text
+            return chat_completion.choices[0].message.content
         except Exception as e:
             return f"Error generating explanation: {str(e)}"
             
@@ -88,11 +91,16 @@ Please create a concise, 3-step "Path to Approval" checklist. Each step should b
             return "1. Reduce your credit utilization by paying down existing debt.\n2. Maintain consistent, on-time payments to improve your payment history.\n3. Wait 3-6 months to establish a longer period of employment or residency stability."
 
         try:
-            response = self.client.models.generate_content(
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
                 model=self.model_name,
-                contents=prompt
             )
-            return response.text
+            return chat_completion.choices[0].message.content
         except Exception as e:
             return f"Error generating health coach plan: {str(e)}"
 
