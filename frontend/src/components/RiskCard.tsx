@@ -21,10 +21,10 @@ const RiskCard: React.FC<RiskCardProps> = ({ probability, category }) => {
 
   const getRiskIcon = () => {
     switch (category) {
-      case 'High': return <ShieldAlert className="text-red-500" size={24} />;
-      case 'Moderate': return <Shield className="text-amber-500" size={24} />;
-      case 'Low': return <ShieldCheck className="text-emerald-500" size={24} />;
-      default: return <Shield className="text-slate-500" size={24} />;
+      case 'High': return <ShieldAlert className="text-red-500" size={16} />;
+      case 'Moderate': return <Shield className="text-amber-500" size={16} />;
+      case 'Low': return <ShieldCheck className="text-emerald-500" size={16} />;
+      default: return <Shield className="text-slate-500" size={16} />;
     }
   };
 
@@ -38,20 +38,20 @@ const RiskCard: React.FC<RiskCardProps> = ({ probability, category }) => {
   };
 
   return (
-    <div className="glass-panel p-5 flex flex-col items-center justify-between h-full hover:shadow-xl transition-all duration-300">
-      <div className="w-full flex justify-between items-center mb-2">
-        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Risk Assessment</h3>
+    <div className="bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-between h-full shadow-sm">
+      <div className="w-full flex justify-between items-center mb-1">
+        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Risk Index</h3>
         {getRiskIcon()}
       </div>
 
-      <div className="relative w-full h-44">
+      <div className="relative w-full h-36 mt-1">
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
             cx="50%"
             cy="50%"
-            innerRadius="70%"
+            innerRadius="80%"
             outerRadius="100%"
-            barSize={12}
+            barSize={10}
             data={data}
             startAngle={210}
             endAngle={-30}
@@ -63,27 +63,27 @@ const RiskCard: React.FC<RiskCardProps> = ({ probability, category }) => {
               tick={false}
             />
             <RadialBar
-              background={{ fill: '#f1f5f9' }}
+              background={{ fill: '#f8fafc' }}
               dataKey="value"
-              cornerRadius={30}
+              cornerRadius={5}
             />
           </RadialBarChart>
         </ResponsiveContainer>
         
         {/* Center Content */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
-          <div className={`text-4xl font-black tracking-tighter ${getRiskColorClass()}`}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
+          <div className={`text-3xl font-black tracking-tight ${getRiskColorClass()}`}>
             {probPercentage.toFixed(1)}%
           </div>
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+          <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest -mt-0.5">
             {category} Risk
           </div>
         </div>
       </div>
 
-      <div className="w-full pt-4 mt-auto border-t border-slate-100 flex justify-center">
-         <p className="text-[10px] text-slate-400 font-medium italic text-center leading-relaxed px-4">
-           Probability of default based on ensemble ML vectors.
+      <div className="w-full pt-3 mt-1 border-t border-slate-50 flex justify-center">
+         <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight text-center">
+           Ensemble ML Inference Score
          </p>
       </div>
     </div>
@@ -91,4 +91,3 @@ const RiskCard: React.FC<RiskCardProps> = ({ probability, category }) => {
 };
 
 export default RiskCard;
-

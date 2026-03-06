@@ -176,129 +176,148 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 w-full max-w-screen-2xl mx-auto">
-
-          {/* COLUMN 1: Borrower Profile & Risk Gauge (3 spans) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-3 space-y-6 flex flex-col">
-            
-            {/* Borrower Profile Card (Novathon Style) */}
-            <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm flex flex-col">
-              <div className="p-6 bg-slate-50 border-b border-slate-100">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <img 
-                      src={`https://ui-avatars.com/api/?name=Applicant+${applicantId}&background=0f172a&color=fff&bold=true`} 
-                      className="w-14 h-14 rounded-full border-2 border-white shadow-sm"
-                      alt="Profile"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
-                       <ShieldCheck size={10} className="text-white" />
+        <div className="flex flex-col gap-6 w-full max-w-screen-2xl mx-auto pb-20">
+          
+          {/* ROW 1: PRIMARY HUB (Profile, Gauge, Summary Stats) */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+            {/* Borrower Profile */}
+            <div className="col-span-1 md:col-span-4 h-full">
+              <div className="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
+                <div className="p-6 bg-slate-50 border-b border-slate-100 flex-grow">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=Applicant+${applicantId}&background=0f172a&color=fff&bold=true`} 
+                        className="w-14 h-14 rounded-full border-2 border-white shadow-sm"
+                        alt="Profile"
+                      />
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                         <ShieldCheck size={10} className="text-white" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 leading-tight">Applicant #{applicantId.toString().padStart(3, '0')}</h3>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Priority Banking Client</p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 leading-tight">Applicant #{applicantId.toString().padStart(3, '0')}</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Priority Banking Client</p>
+                  <div className="mt-5 grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Age</span>
+                      <span className="text-xs font-bold text-slate-700">{30 + (applicantId % 40)} Years</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Category</span>
+                      <span className="text-xs font-bold text-slate-700">Salaried</span>
+                    </div>
                   </div>
                 </div>
-                
-                <div className="mt-5 grid grid-cols-2 gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Age</span>
-                    <span className="text-xs font-bold text-slate-700">{30 + (applicantId % 40)} Years</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Category</span>
-                    <span className="text-xs font-bold text-slate-700">Salaried</span>
-                  </div>
+                <div className="p-5 space-y-3 border-t border-slate-50">
+                   <div className="flex justify-between items-center text-xs">
+                      <span className="font-medium text-slate-500">Employer Node</span>
+                      <span className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase ${data?.trust_graph_analysis.employer_node_flag.includes('Alert') ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
+                        {data?.trust_graph_analysis.employer_node_flag.replace('_', ' ') || 'VERIFIED'}
+                      </span>
+                   </div>
+                   <div className="flex justify-between items-center text-xs">
+                      <span className="font-medium text-slate-500">Verification Hash</span>
+                      <span className="font-mono text-[10px] text-slate-400">0x{applicantId}F{applicantId}A...</span>
+                   </div>
                 </div>
-              </div>
-
-              <div className="p-5 space-y-3">
-                 <div className="flex justify-between items-center text-xs">
-                    <span className="font-medium text-slate-500">Node Status</span>
-                    <span className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase ${data?.trust_graph_analysis.employer_node_flag.includes('Alert') ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-emerald-50 text-emerald-600 border border-emerald-100'}`}>
-                      {data?.trust_graph_analysis.employer_node_flag.replace('_', ' ') || 'VERIFIED'}
-                    </span>
-                 </div>
-                 <div className="flex justify-between items-center text-xs">
-                    <span className="font-medium text-slate-500">Fraud Score</span>
-                    <span className="font-mono font-bold text-slate-800">{data?.fraud_matrix_analysis.fraud_intent_score.toFixed(1)}%</span>
-                 </div>
-                 <div className="flex justify-between items-center text-xs">
-                    <span className="font-medium text-slate-500">Stress Index</span>
-                    <span className="font-mono font-bold text-slate-800">{data?.financial_stress_analysis.stress_score.toFixed(1)}</span>
-                 </div>
               </div>
             </div>
 
-            {/* Risk Card (Gauge) */}
-            <div className="h-72 flex-shrink-0">
+            {/* Risk Gauge */}
+            <div className="col-span-1 md:col-span-3 h-full">
               <RiskCard
                 probability={data?.prediction_metrics.adjusted_probability || 0}
                 category={data?.prediction_metrics.risk_category || 'Low'}
               />
             </div>
 
-            {/* GenAI Health Coach */}
-            <div className="flex-grow flex flex-col h-full min-h-[250px]">
-              <NarrativeBox
-                text={data && data.genai_insights ? data.genai_insights.health_coach_plan : null}
-                isLoading={isGenAILoading}
-                title="AI Health Coach"
-                subtitle="Approval Path Optimization"
-              />
+            {/* Global Logic Stats */}
+            <div className="col-span-1 md:col-span-5 h-full">
+              <div className="bg-white border border-slate-100 rounded-xl p-6 h-full shadow-sm flex flex-col justify-between">
+                <div className="flex justify-between items-start mb-4">
+                   <div>
+                     <h3 className="text-[11px] font-black text-slate-800 uppercase tracking-widest">Global Risk Vectors</h3>
+                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Integrated Model Metrics</p>
+                   </div>
+                   <Activity size={18} className="text-blue-900 opacity-20" />
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Fraud Intent</div>
+                      <div className="text-2xl font-black text-slate-800">{data?.fraud_matrix_analysis.fraud_intent_score.toFixed(1)}%</div>
+                      <div className="w-full bg-slate-200 h-1 rounded-full mt-2 overflow-hidden">
+                         <div className="bg-blue-900 h-full" style={{ width: `${Math.abs(data?.fraud_matrix_analysis.fraud_intent_score || 0)}%` }}></div>
+                      </div>
+                   </div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mb-1">Financial Stress</div>
+                      <div className="text-2xl font-black text-slate-800">{data?.financial_stress_analysis.stress_score.toFixed(1)}</div>
+                      <div className="w-full bg-slate-200 h-1 rounded-full mt-2 overflow-hidden">
+                         <div className="bg-blue-900 h-full" style={{ width: `${data?.financial_stress_analysis.stress_score || 0}%` }}></div>
+                      </div>
+                   </div>
+                </div>
+                <div className="mt-4 text-[10px] text-slate-400 font-bold italic border-t border-slate-50 pt-3 flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-blue-900 animate-pulse"></div>
+                   Live ML Signals Synchronized
+                </div>
+              </div>
             </div>
-
           </div>
 
-          {/* COLUMN 2: Visualizations & Analytics (5 spans) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-5 space-y-6 flex flex-col">
-
-            {/* Financial Stress Chart */}
-            <div className="h-72 flex-shrink-0">
-              <StressTrajectoryChart stressData={data?.financial_stress_analysis || null} isLoading={isLoading} />
-            </div>
-
-            {/* OSINT Fraud Matrix */}
-            <div className="h-64 flex-shrink-0">
-              <RiskMatrix2x2 fraudData={data?.fraud_matrix_analysis || null} isLoading={isLoading} />
-            </div>
-
-            {/* Loan Negotiation Options */}
-            <div className="flex-grow">
-              <NegotiationPanel
-                negotiationData={data?.negotiation_alternatives || null}
-                baseRisk={data?.prediction_metrics.base_probability || 0}
-                isLoading={isLoading}
-              />
-            </div>
-
+          {/* ROW 2: SIGNAL ANALYTICS (Charts) */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+             <div className="col-span-1 md:col-span-6 min-h-[400px]">
+                <StressTrajectoryChart stressData={data?.financial_stress_analysis || null} isLoading={isLoading} />
+             </div>
+             <div className="col-span-1 md:col-span-6 min-h-[400px]">
+                <SHAPChart
+                  riskFactors={data?.shap_explanation.top_risk_factors || null}
+                  mitigatingFactors={data?.shap_explanation.top_mitigating_factors || null}
+                />
+             </div>
           </div>
 
-          {/* COLUMN 3: Explainability Details (4 spans) */}
-          <div className="col-span-1 md:col-span-12 lg:col-span-4 space-y-6 flex flex-col">
-
-            {/* SHAP Values Chart */}
-            <div className="h-[450px] flex-shrink-0">
-               <SHAPChart
-                 riskFactors={data?.shap_explanation.top_risk_factors || null}
-                 mitigatingFactors={data?.shap_explanation.top_mitigating_factors || null}
-               />
-            </div>
-
-            {/* GenAI Analyst Narrative */}
-            <div className="flex-grow h-full min-h-[300px]">
-              <NarrativeBox
-                text={data && data.genai_insights ? data.genai_insights.narrative : null}
-                isLoading={isGenAILoading}
-                title="GenAI Committee Summary"
-                subtitle="Integrated Financial Risk Narrative"
-              />
-            </div>
-
+          {/* ROW 3: RISK MAPPING & COMMENTARY */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+             <div className="col-span-1 md:col-span-4 min-h-[350px]">
+                <RiskMatrix2x2 fraudData={data?.fraud_matrix_analysis || null} isLoading={isLoading} />
+             </div>
+             <div className="col-span-1 md:col-span-8 min-h-[350px]">
+                <NarrativeBox
+                  text={data && data.genai_insights ? data.genai_insights.narrative : null}
+                  isLoading={isGenAILoading}
+                  title="GenAI Analyst Commentary"
+                  subtitle="Integrated Risk Narrative"
+                />
+             </div>
           </div>
+
+          {/* ROW 4: STRATEGY & RECOURSE */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+             <div className="col-span-1 md:col-span-7">
+                <NegotiationPanel
+                  negotiationData={data?.negotiation_alternatives || null}
+                  baseRisk={data?.prediction_metrics.base_probability || 0}
+                  isLoading={isLoading}
+                />
+             </div>
+             <div className="col-span-1 md:col-span-5 min-h-[280px]">
+                <NarrativeBox
+                  text={data && data.genai_insights ? data.genai_insights.health_coach_plan : null}
+                  isLoading={isGenAILoading}
+                  title="AI Health Coach"
+                  subtitle="Path to Approval & Recourse"
+                />
+             </div>
+          </div>
+
         </div>
       )}
     </main>
   );
+
 }
