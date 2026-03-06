@@ -51,8 +51,12 @@ export default function Home() {
       
       const result = await response.json();
       setData(result);
-    } catch (err: any) {
-      setError(err.message || "An unknown error occurred.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
       setData(null);
     } finally {
       setIsLoading(false);

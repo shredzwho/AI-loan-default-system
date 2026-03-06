@@ -26,6 +26,8 @@ app.add_middleware(
 )
 
 # Load systems at startup
+explainer = None
+llm = None
 try:
     explainer = ModelExplainer(
         model_path="src/models/saved_models/xgboost.pkl",
@@ -47,6 +49,9 @@ def analyze_borrower(request: BorrowerRequest):
     """
     Analyzes a borrower from the preprocessed test set.
     """
+    if not explainer or not llm:
+        raise HTTPException(status_code=503, detail="Machine Learning models are not fully initialized. Ensure you have run train.py first.")
+
     try:
         # 1. Ensure valid ID
         if request.applicant_id < 0 or request.applicant_id >= len(explainer.X_test):

@@ -1,5 +1,5 @@
 import os
-import google.generativeai as genai
+from google import genai
 from typing import Dict, Any
 from dotenv import load_dotenv
 
@@ -11,12 +11,12 @@ class DefaultExplainerLLM:
         # Assumes GEMINI_API_KEY is set in environment variables
         self.api_key = os.getenv("GEMINI_API_KEY")
         if self.api_key:
-            genai.configure(api_key=self.api_key)
+            self.client = genai.Client(api_key=self.api_key)
             # Use a fast, capable model for generating text
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
+            self.model_name = 'gemini-2.5-flash'
         else:
             print("WARNING: GEMINI_API_KEY not found in environment. Mocking LLM response.")
-            self.model = None
+            self.client = None
 
     def _construct_prompt(self, explanation_data: Dict[str, Any]) -> str:
         """
@@ -58,13 +58,16 @@ Keep the tone objective and professional. Do not use terms like "SHAP values" or
         """
         prompt = self._construct_prompt(explanation_data)
         
-        if not self.model:
+        if not self.client:
             # Fallback for hackathon demo if no API key is set
             prob = explanation_data['default_probability'] * 100
             return f"[MOCK LLM RESPONSE]\nBased on the model, there is a {prob:.1f}% risk of default. The primary risk factor is {explanation_data['risk_factors_increasing_default'][0]['Feature']}. Manual review suggested."
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             return response.text
         except Exception as e:
             return f"Error generating explanation: {str(e)}"

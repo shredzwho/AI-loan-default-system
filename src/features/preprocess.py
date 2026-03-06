@@ -90,19 +90,18 @@ class DataPreprocessor:
             X, y, test_size=0.2, random_state=42, stratify=y
         )
         
-        # 5. Handle Imbalanced Data using SMOTE on the training set ONLY.
-        # This prevents the model from being biased towards the majority class (non-defaulters).
+        # 5. Feature Scaling (StandardScaler)
+        # We must fit the scaler on the original training data BEFORE generating synthetic data with SMOTE to avoid data leakage
+        print("Scaling numerical features...")
+        X_train_scaled_raw = pd.DataFrame(self.scaler.fit_transform(X_train), columns=X.columns)
+        X_test_scaled = pd.DataFrame(self.scaler.transform(X_test), columns=X.columns)
+        
+        # 6. Handle Imbalanced Data using SMOTE on the scaled training set ONLY.
         print("Applying SMOTE to handle imbalanced classes in the training set...")
         smote = SMOTE(random_state=42)
-        X_train_smote, y_train_smote = smote.fit_resample(X_train, y_train)
+        X_train_scaled, y_train_smote = smote.fit_resample(X_train_scaled_raw, y_train)
         print(f"Original Training Class Distribution:\n{y_train.value_counts()}")
         print(f"SMOTE Training Class Distribution:\n{y_train_smote.value_counts()}")
-        
-        # 6. Feature Scaling (StandardScaler)
-        # We fit the scaler strongly on training data and transform both train and test data
-        print("Scaling numerical features...")
-        X_train_scaled = pd.DataFrame(self.scaler.fit_transform(X_train_smote), columns=X.columns)
-        X_test_scaled = pd.DataFrame(self.scaler.transform(X_test), columns=X.columns)
         
         # Save the fitted scaler for inference later
         joblib.dump(self.scaler, os.path.join(self.processed_data_path, 'scaler.pkl'))

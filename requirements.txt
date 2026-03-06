@@ -7,7 +7,7 @@ shap
 streamlit
 fastapi
 uvicorn
-google-generativeai
+google-genai
 pytest
 matplotlib
 seaborn
