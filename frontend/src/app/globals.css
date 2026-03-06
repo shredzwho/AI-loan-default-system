@@ -1,59 +1,61 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc; /* Slate 50 */
+  --background: #fcfcfd; /* Clean Gray-Tinted White */
   --foreground: #0f172a; /* Slate 900 */
   
-  --card: rgba(255, 255, 255, 0.95); /* Pure White with high opacity */
-  --card-border: rgba(226, 232, 240, 0.8); /* Slate 200 border */
+  --card: #ffffff;
+  --card-border: #f1f5f9; /* Slate 100 */
   
-  --primary: #1e3a8a; /* Blue 900 - Navy/Sapphire for luxury banking */
-  --primary-hover: #1e40af; /* Blue 800 */
-  
-  --danger: #dc2626; /* Red 600 */
-  --warning: #d97706; /* Amber 600 */
-  --success: #059669; /* Emerald 600 */
+  --primary: #0f172a; /* Navy 950 */
+  --accent: #1e40af; /* Blue 800 */
+}
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans);
   min-height: 100vh;
-  /* Add a subtle, warm radial gradient for premium light mode feel */
-  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, #f1f5f9 70%);
+  background-image: radial-gradient(circle at 50% 0%, #ffffff 0%, #fcfcfd 100%);
+  letter-spacing: -0.01em;
 }
 
-/* Glassmorphism Classes */
-.glass-panel {
+/* Premium Component Utilities */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.card-premium {
   background: var(--card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--card-border);
-  border-radius: 1rem;
-  /* Ultra-soft diffused luxury shadow instead of harsh glows */
-  box-shadow: 0 20px 40px -15px rgba(30, 58, 138, 0.05), 0 0 10px 0 rgba(0, 0, 0, 0.02);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-header {
-  border-bottom: 1px solid var(--card-border);
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
+.card-premium:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  border-color: #e2e8f0;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1; /* Slate 300 */
+  background: #e2e8f0;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8; /* Slate 400 */
+  background: #cbd5e1;
 }
 
 /* Text Gradients */
@@ -64,42 +66,30 @@ body {
 }
 
 .text-gradient-primary {
-  background-image: linear-gradient(to right, #60a5fa, #3b82f6);
-}
-
-.text-gradient-danger {
-  background-image: linear-gradient(to right, #f87171, #ef4444);
-}
-
-.text-gradient-warning {
-  background-image: linear-gradient(to right, #fbbf24, #f59e0b);
-}
-
-.text-gradient-success {
-  background-image: linear-gradient(to right, #34d399, #10b981);
+  background-image: linear-gradient(to right, #1e3a8a, #3b82f6);
 }
 
 /* Micro-animations */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Professional Typography Scale */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.label-caps {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #94a3b8; /* Slate 400 */
+  font-family: var(--font-display);
 }

@@ -108,10 +108,20 @@ def analyze_borrower(request: BorrowerRequest):
         # 7. GenAPI Explainer & Health Coach Recourse
         # Update the explanation probability to the new adjusted one for the LLM context
         explanation_data['default_probability'] = adjusted_probability
-        narrative = llm.generate_explanation(explanation_data)
+        genai_result = llm.generate_explanation(explanation_data)
         health_coach_plan = llm.generate_health_coach_plan(explanation_data)
         
-        # 8. Construct Command Center Master Payload
+        # 8. Document Verification (Mocked for dashboard parity)
+        # We use the applicant_id as a seed to make it consistent
+        seed = request.applicant_id
+        document_verification = {
+            "aadhar_verified": (seed % 2 == 0),
+            "pan_verified": (seed % 3 != 0),
+            "salary_slips_verified": (seed % 5 != 0),
+            "bank_statements_verified": (seed % 7 == 0)
+        }
+
+        # 9. Construct Command Center Master Payload
         response = {
             "applicant_id": request.applicant_id,
             "prediction_metrics": {
@@ -127,8 +137,11 @@ def analyze_borrower(request: BorrowerRequest):
             "financial_stress_analysis": stress_data,
             "fraud_matrix_analysis": fraud_data,
             "negotiation_alternatives": negotiation_data,
+            "document_verification": document_verification,
             "genai_insights": {
-                "narrative": narrative,
+                "narrative": genai_result["narrative"],
+                "positive_indicators": genai_result["positive_indicators"],
+                "risk_drivers": genai_result["risk_drivers"],
                 "health_coach_plan": health_coach_plan
             }
         }
@@ -207,15 +220,27 @@ async def websocket_analyze_borrower(websocket: WebSocket):
         explanation_data['default_probability'] = adjusted_probability
         
         loop = asyncio.get_event_loop()
-        narrative = await loop.run_in_executor(None, llm.generate_explanation, explanation_data)
+        genai_result = await loop.run_in_executor(None, llm.generate_explanation, explanation_data)
         health_coach_plan = await loop.run_in_executor(None, llm.generate_health_coach_plan, explanation_data)
         
+        # Document Verification (Mocked for dashboard parity)
+        seed = applicant_id
+        document_verification = {
+            "aadhar_verified": (seed % 2 == 0),
+            "pan_verified": (seed % 3 != 0),
+            "salary_slips_verified": (seed % 5 != 0),
+            "bank_statements_verified": (seed % 7 == 0)
+        }
+
         complete_response = {
             "type": "complete",
             "data": {
                 **partial_response["data"],
+                "document_verification": document_verification,
                 "genai_insights": {
-                    "narrative": narrative,
+                    "narrative": genai_result["narrative"],
+                    "positive_indicators": genai_result["positive_indicators"],
+                    "risk_drivers": genai_result["risk_drivers"],
                     "health_coach_plan": health_coach_plan
                 }
             }

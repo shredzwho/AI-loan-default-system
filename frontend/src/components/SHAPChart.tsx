@@ -75,13 +75,13 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
   ].sort((a, b) => b.shapValue - a.shapValue);
 
   return (
-    <div className="bg-white border border-slate-100 rounded-xl p-6 shadow-sm w-full h-full min-h-[400px] flex flex-col">
-      <div className="mb-6 flex justify-between items-start">
+    <div className="card-premium p-7 w-full h-full min-h-[400px] flex flex-col bg-white">
+      <div className="mb-8 flex justify-between items-start">
         <div>
-          <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest flex items-center gap-2">
+          <h3 className="text-base font-black text-slate-900 tracking-tight font-display">
             Mathematical Decision Vectors
           </h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">SHAP Factor Contribution Analysis</p>
+          <p className="label-caps !text-[10px] mt-1.5 opacity-60">SHAP Factor Contribution Analysis</p>
         </div>
       </div>
       
@@ -90,14 +90,14 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
           <BarChart
             layout="vertical"
             data={data}
-            margin={{ top: 0, right: 30, left: 140, bottom: 0 }}
-            barSize={14}
+            margin={{ top: 0, right: 40, left: 150, bottom: 0 }}
+            barSize={16}
           >
             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" vertical={true} />
             
             <XAxis 
               type="number" 
-              tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+              tick={{ fill: '#94a3b8', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-display)' }}
               stroke="#f1f5f9"
               axisLine={false}
               tickLine={false}
@@ -106,8 +106,8 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
             <YAxis 
               type="category" 
               dataKey="name" 
-              tick={{ fill: '#475569', fontSize: 9, fontWeight: 800 }}
-              width={130}
+              tick={{ fill: '#0f172a', fontSize: 10, fontWeight: 800, fontFamily: 'var(--font-display)' }}
+              width={140}
               stroke="#f1f5f9"
               axisLine={false}
               tickLine={false}
@@ -121,7 +121,7 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
             
             <ReferenceLine x={0} stroke="#cbd5e1" strokeWidth={1} />
             
-            <Bar dataKey="shapValue" radius={[0, 4, 4, 0]} animationDuration={1000}>
+            <Bar dataKey="shapValue" radius={[0, 6, 6, 0]} animationDuration={1200}>
               {data.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
@@ -133,14 +133,14 @@ const SHAPChart: React.FC<SHAPChartProps> = ({ riskFactors, mitigatingFactors })
         </ResponsiveContainer>
       </div>
       
-      <div className="flex justify-center gap-8 mt-6 pt-4 border-t border-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-          <span>Default Risk +</span>
+      <div className="flex justify-center gap-10 mt-8 pt-5 border-t border-slate-50">
+        <div className="flex items-center gap-2.5">
+          <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/20"></div>
+          <span className="label-caps !text-[10px] !text-slate-500">Default Risk +</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-          <span>Default Risk -</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/20"></div>
+          <span className="label-caps !text-[10px] !text-slate-500">Default Risk -</span>
         </div>
       </div>
     </div>

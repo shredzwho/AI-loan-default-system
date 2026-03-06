@@ -16,14 +16,14 @@ interface RiskMatrixProps {
 const RiskMatrix2x2: React.FC<RiskMatrixProps> = ({ fraudData, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="glass-panel p-6 h-full flex flex-col justify-center items-center animate-pulse bg-slate-50">
-        <div className="w-12 h-12 bg-slate-200 rounded-full mb-4"></div>
-        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+      <div className="card-premium p-8 h-full flex flex-col justify-center items-center animate-pulse bg-white">
+        <div className="w-16 h-16 bg-slate-50 rounded-2xl mb-6 shadow-sm"></div>
+        <div className="h-4 bg-slate-100 rounded-full w-1/2"></div>
       </div>
     );
   }
 
-  if (!fraudData) return <div className="glass-panel p-6 h-full border border-slate-200 bg-slate-50"></div>;
+  if (!fraudData) return <div className="card-premium p-8 h-full border border-slate-100 bg-white"></div>;
 
   const isHighIntent = fraudData.fraud_intent_category === "High Intent";
   const positionParts = fraudData.matrix_position.split(":");
@@ -32,55 +32,57 @@ const RiskMatrix2x2: React.FC<RiskMatrixProps> = ({ fraudData, isLoading }) => {
   
   // Matrix Box Selection
   let boxColor = "bg-white";
-  let icon = <ShieldCheck size={28} className="text-emerald-600" />;
+  let icon = <ShieldCheck size={32} className="text-emerald-600" />;
   
   if (title.includes("Critical Risk")) {
-    boxColor = "bg-red-50/50 ring-1 ring-red-200";
-    icon = <ShieldAlert size={28} className="text-red-600" />;
+    boxColor = "bg-red-50/20";
+    icon = <ShieldAlert size={32} className="text-red-600" />;
   } else if (title.includes("Sleeper Risk")) {
-    boxColor = "bg-orange-50/50 ring-1 ring-orange-200";
-    icon = <Crosshair size={28} className="text-orange-600" />;
+    boxColor = "bg-orange-50/20";
+    icon = <Crosshair size={32} className="text-orange-600" />;
   } else if (title.includes("Financial Risk")) {
-    boxColor = "bg-amber-50/50 ring-1 ring-amber-200";
-    icon = <AlertTriangle size={28} className="text-amber-600" />;
+    boxColor = "bg-amber-50/20";
+    icon = <AlertTriangle size={32} className="text-amber-600" />;
   } else {
-    boxColor = "bg-emerald-50/30 border border-emerald-200";
+    boxColor = "bg-emerald-50/10";
   }
 
   return (
-    <div className={`glass-panel p-6 h-full ${boxColor} relative overflow-hidden flex flex-col`}>
-      <div className="absolute top-0 right-0 p-4 opacity-5 text-slate-800">
-        <ShieldAlert size={100} />
+    <div className={`card-premium p-8 h-full ${boxColor} relative overflow-hidden flex flex-col bg-white`}>
+      <div className="absolute top-0 right-0 p-6 opacity-[0.03] text-slate-900 pointer-events-none">
+        <ShieldAlert size={120} />
       </div>
 
-      <div className="flex items-center gap-3 mb-4 relative z-10">
-        {icon}
+      <div className="flex items-center gap-4 mb-6 relative z-10">
+        <div className="bg-white p-2.5 rounded-2xl shadow-sm border border-slate-50">
+          {icon}
+        </div>
         <div>
-          <h3 className="text-lg font-bold text-slate-900">OSINT Fraud Matrix</h3>
-          <p className="text-xs text-slate-500">Threat Intent vs Capacity</p>
+          <h3 className="text-lg font-black text-slate-900 font-display tracking-tight">OSINT Fraud Matrix</h3>
+          <p className="label-caps !text-[10px] mt-1.5 opacity-60">Threat Intent vs Capacity Analysis</p>
         </div>
       </div>
 
       <div className="flex-grow flex flex-col justify-center relative z-10">
-        <div className="mb-2">
-           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Position Classification</span>
-           <h4 className={`text-xl font-black ${title.includes("Safe") ? "text-emerald-700" : "text-slate-900"}`}>
+        <div className="mb-4">
+           <span className="label-caps !text-[9px] mb-2 block">Position Classification</span>
+           <h4 className={`text-2xl font-black font-display tracking-tight ${title.includes("Safe") ? "text-emerald-600" : "text-slate-900"}`}>
              {title}
            </h4>
-           <p className="text-sm text-slate-600 mt-1 font-medium">{description}</p>
+           <p className="text-sm text-slate-600 mt-2 font-medium leading-relaxed">{description}</p>
         </div>
         
-        <div className="mt-4 p-3 bg-slate-100 rounded-lg text-xs text-slate-600 font-mono leading-relaxed border border-slate-200 shadow-inner">
-           {'>'} {fraudData.reasoning}
+        <div className="mt-5 p-5 bg-slate-50/50 rounded-2xl text-[12px] text-slate-600 font-mono leading-relaxed border border-slate-50/50 shadow-inner">
+           <span className="text-slate-300 mr-2">LOG:</span> {fraudData.reasoning}
         </div>
       </div>
       
-      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3 relative z-10">
-        <div className="text-xs font-semibold text-slate-500">
-          Intent Score: <span className={`font-bold ${isHighIntent ? 'text-red-600' : 'text-slate-900'}`}>{fraudData.fraud_intent_score}/100</span>
+      <div className="mt-6 flex items-center justify-between border-t border-slate-50 pt-5 relative z-10">
+        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          Intent Score: <span className={`font-black font-display text-base ml-1 ${isHighIntent ? 'text-red-600' : 'text-slate-900'}`}>{fraudData.fraud_intent_score}<span className="text-[10px] text-slate-300 font-normal ml-0.5">/100</span></span>
         </div>
-        <div className="text-xs text-slate-400 font-medium">
-          Dual-Layer Engine
+        <div className="label-caps !text-[9px] opacity-40">
+          Dual-Layer Proprietary Engine
         </div>
       </div>
     </div>

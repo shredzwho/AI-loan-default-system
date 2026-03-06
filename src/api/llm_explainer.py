@@ -50,16 +50,26 @@ Keep the tone objective and professional. Do not use terms like "SHAP values" or
 """
         return prompt
 
-    def generate_explanation(self, explanation_data: Dict[str, Any]) -> str:
+    def generate_explanation(self, explanation_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Takes the SHAP explanation dictionary and returns a natural language summary.
+        Takes the SHAP explanation dictionary and returns a structured response
+        containing the natural language summary and explicit indicators.
         """
+        # Map raw SHAP factors to "Indicators" for the UI parity
+        # We take top 3 of each
+        positives = [f"{f['Feature'].replace('_', ' ').title()} Optimization" for f in explanation_data['mitigating_factors_decreasing_default'][:3]]
+        risks = [f"{f['Feature'].replace('_', ' ').title()} Pressure" for f in explanation_data['risk_factors_increasing_default'][:3]]
+
         prompt = self._construct_prompt(explanation_data)
         
         if not self.client:
             # Fallback for hackathon demo if no API key is set
             prob = explanation_data['default_probability'] * 100
-            return f"[MOCK LLM RESPONSE]\nBased on the model, there is a {prob:.1f}% risk of default. The primary risk factor is {explanation_data['risk_factors_increasing_default'][0]['Feature']}. Manual review suggested."
+            return {
+                "narrative": f"Based on the model, there is a {prob:.1f}% risk of default. The primary risk factor is {explanation_data['risk_factors_increasing_default'][0]['Feature']}. Manual review suggested.",
+                "positive_indicators": positives if positives else ["Stable Income History"],
+                "risk_drivers": risks if risks else ["Elevated Debt Burden"]
+            }
 
         try:
             chat_completion = self.client.chat.completions.create(
@@ -71,9 +81,19 @@ Keep the tone objective and professional. Do not use terms like "SHAP values" or
                 ],
                 model=self.model_name,
             )
-            return chat_completion.choices[0].message.content
+            narrative = chat_completion.choices[0].message.content
+            
+            return {
+                "narrative": narrative,
+                "positive_indicators": positives if positives else ["Stable Income History"],
+                "risk_drivers": risks if risks else ["Elevated Debt Burden"]
+            }
         except Exception as e:
-            return f"Error generating explanation: {str(e)}"
+            return {
+                "narrative": f"Error generating explanation: {str(e)}",
+                "positive_indicators": ["System Error"],
+                "risk_drivers": ["Explanation Timeout"]
+            }
             
     def generate_health_coach_plan(self, explanation_data: Dict[str, Any]) -> str:
         """
